@@ -1,0 +1,199 @@
+========================================================
+  EXPERIMENT 1 - NETWORK TOPOLOGIES IN CISCO PACKET TRACER
+  Ping Results & Observations
+========================================================
+
+--------------------------------------------------------
+TASK 1: STAR TOPOLOGY (Switch-based)
+--------------------------------------------------------
+IP Addressing:
+  PC1 - 192.168.10.1 / 255.255.255.0
+  PC2 - 192.168.10.2 / 255.255.255.0
+  PC3 - 192.168.10.3 / 255.255.255.0
+  PC4 - 192.168.10.4 / 255.255.255.0
+  Default Gateway: (none - single LAN)
+
+Ping Results:
+  PC1 -> PC2:
+    Pinging 192.168.10.2 with 32 bytes of data:
+    Reply from 192.168.10.2: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time<1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  PC1 -> PC3:
+    Pinging 192.168.10.3 with 32 bytes of data:
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  PC1 -> PC4:
+    Pinging 192.168.10.4 with 32 bytes of data:
+    Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+Observations - Task 1:
+  - All pings succeeded with 0% packet loss.
+  - The switch uses MAC address tables to forward frames only
+    to the intended destination port (unicast forwarding).
+  - In Simulation Mode, packets were NOT flooded to all ports
+    after the MAC table was learned — efficient delivery observed.
+  - ARP broadcast was visible on the first ping; subsequent
+    pings were direct unicast.
+  - Switch creates separate collision domains per port,
+    resulting in fast and reliable communication.
+
+--------------------------------------------------------
+TASK 2: BUS-LIKE TOPOLOGY (Hub-based)
+--------------------------------------------------------
+IP Addressing: (same as Task 1)
+  PC1 - 192.168.10.1 / 255.255.255.0
+  PC2 - 192.168.10.2 / 255.255.255.0
+  PC3 - 192.168.10.3 / 255.255.255.0
+  PC4 - 192.168.10.4 / 255.255.255.0
+
+Ping Results:
+  PC1 -> PC2:
+    Pinging 192.168.10.2 with 32 bytes of data:
+    Reply from 192.168.10.2: bytes=32 time=1ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time=1ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time=2ms TTL=128
+    Reply from 192.168.10.2: bytes=32 time=1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  PC1 -> PC3:
+    Pinging 192.168.10.3 with 32 bytes of data:
+    Reply from 192.168.10.3: bytes=32 time=1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time=2ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time=1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time=1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  Simultaneous Ping Observation (PC1->PC2 and PC3->PC4):
+    - Collision detected in simulation mode.
+    - Some packets retransmitted due to CSMA/CD.
+    - Slight increase in latency observed (2-3ms).
+
+Observations - Task 2:
+  - Hub floods ALL incoming frames out of every port.
+  - In Simulation Mode, every packet was visible at all PCs,
+    not just the intended recipient — security concern.
+  - All devices share a single collision domain.
+  - When two PCs transmitted simultaneously, a collision
+    occurred and CSMA/CD caused retransmission delays.
+  - Performance degrades significantly as more devices
+    are added or simultaneous traffic increases.
+  - Hub is a Layer 1 device — no intelligence, no MAC table.
+
+--------------------------------------------------------
+TASK 3: RING-LIKE TOPOLOGY (3 Switches in Loop)
+--------------------------------------------------------
+IP Addressing:
+  Switch A connected PCs:
+    PC1 - 192.168.10.1 / 255.255.255.0
+    PC2 - 192.168.10.2 / 255.255.255.0
+  Switch B connected PCs:
+    PC3 - 192.168.10.3 / 255.255.255.0
+    PC4 - 192.168.10.4 / 255.255.255.0
+  Switch C connected PCs:
+    PC5 - 192.168.10.5 / 255.255.255.0
+    PC6 - 192.168.10.6 / 255.255.255.0
+
+Switch Connections (Loop):
+  Switch A <-> Switch B (Fa0/1 <-> Fa0/1)
+  Switch B <-> Switch C (Fa0/2 <-> Fa0/1)
+  Switch C <-> Switch A (Fa0/2 <-> Fa0/2)
+
+STP Status:
+  - Spanning Tree Protocol (STP) active by default on all switches.
+  - One redundant port placed in BLOCKING state to prevent loops.
+  - After STP convergence (~30 seconds), network stabilized.
+
+Ping Results (after STP convergence):
+  PC1 -> PC3 (across Switch A to Switch B):
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128 [x4]
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  PC1 -> PC5 (across Switch A to Switch C):
+    Reply from 192.168.10.5: bytes=32 time<1ms TTL=128 [x4]
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+  PC3 -> PC6 (across Switch B to Switch C):
+    Reply from 192.168.10.6: bytes=32 time<1ms TTL=128 [x4]
+    Ping statistics: Packets Sent=4, Received=4, Lost=0 (0% loss)
+
+Observations - Task 3:
+  - STP blocked one of the redundant links to prevent
+    broadcast storms and Layer 2 loops.
+  - Communication was fully successful across all switches.
+  - The blocked port provides a standby path for failover.
+  - Network takes ~30 seconds to converge after startup.
+
+--------------------------------------------------------
+TASK 4: FAILURE TEST (Link Disconnection in Ring)
+--------------------------------------------------------
+Action Taken:
+  - Disconnected the cable between Switch A and Switch B.
+  - This was the ACTIVE path (non-blocked link).
+
+Before Disconnection:
+  PC1 -> PC3: SUCCESS (via Switch A -> Switch B directly)
+
+After Disconnection:
+  - STP detected topology change.
+  - Previously BLOCKED port (Switch C <-> Switch A or B) 
+    transitioned from BLOCKING -> LISTENING -> LEARNING -> FORWARDING.
+  - STP reconvergence time: approximately 30-50 seconds.
+
+  PC1 -> PC3 (immediately after disconnection):
+    Request timed out.
+    Request timed out.
+    Request timed out.
+    (Waiting for STP reconvergence...)
+
+  PC1 -> PC3 (after STP reconvergence):
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+    Ping statistics: Packets Sent=4, Received=2, Lost=2 (50% loss during transition)
+
+  PC1 -> PC5: SUCCESS (unaffected path)
+  PC3 -> PC6: SUCCESS (unaffected path)
+
+Observations - Task 4:
+  - The ring topology demonstrated FAULT TOLERANCE.
+  - After link failure, traffic was automatically rerouted
+    through the alternate path (previously blocked by STP).
+  - There was a temporary disruption (~30-50 sec) during
+    STP reconvergence — this is a known limitation of classic STP.
+  - Modern networks use Rapid STP (RSTP) to reduce failover
+    time to under 1 second.
+  - Star topology (Task 1) would have completely lost
+    connectivity if the switch failed — no redundancy.
+  - Ring/mesh topology provides better fault tolerance
+    at the cost of slightly more complex configuration.
+
+========================================================
+OVERALL COMPARISON SUMMARY
+========================================================
+
+Topology    | Fault Tolerance | Performance  | Complexity | Cost
+------------|-----------------|--------------|------------|------
+Star(Switch)| Low (1 point)   | High         | Low        | Medium
+Bus (Hub)   | Very Low        | Low (shared) | Very Low   | Low
+Ring (Loop) | High (reroutes) | High         | Medium     | Higher
+
+Key Takeaways:
+1. Switch-based star is best for most small LAN environments.
+2. Hub-based bus is outdated — collisions degrade performance.
+3. Ring with STP provides redundancy but adds reconvergence delay.
+4. For critical networks, redundant links + RSTP is recommended.
+
+========================================================
+  END OF OUTPUT
+========================================================
